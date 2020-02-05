@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>MAngband JS Client</title>
+  <!-- Load React. -->
+  <!-- Note: when deploying, replace "development.js" with "production.min.js". -->
+  <script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script>
+<!-- Rest of the stuff. -->
+<script src="websock.js"></script>
+<script src="net-core.js"></script>
+<script src="net-mang150.js"></script>
+<script src="net-pwma140.js"></script>
+<script src="net-tome472.js"></script>
+<script src="z-canvas.js"></script>
+<script src="ui-react.js"></script>
+<script src="mangclient-react.js"></script>
+</head>
+<body>
+
+<div id="screen" tabindex="1" style="background:blue;">
+</div>
+
+<!-- Some kind of a form to give some inputs. -->
+<form id="debug_constructor">
+	<p><span>server</span><input type="text" name="server" value="mangband.org" required/></p>
+	<p><span>port</span><input type="number" name="port" value="18380" required/></p>
+	<p><span>protocol</span><select name="protocol"></p>
+		<option>mangband150</option>
+		<option>tomenet472</option>
+		<option>pwmangband140</option>
+	</select></p>
+	<p><span>login</span><input type="text" name="login" required/></p>
+	<p><span>password</span><input type="password" name="password" required/></p>
+	<button type="submit">Connect</button>
+</form>
+<script>
+
+//Now let's react to form
+var form = document.getElementById('debug_constructor');
+form.addEventListener('submit', function(e) {
+	e.preventDefault();
+	const values = {};
+	document.querySelectorAll("#debug_constructor input, #debug_constructor select").forEach(element => values[element.name] = element.value);
+	values['server'] = 'ws://' + values['server'] + ':' + values['port'];
+
+	form.style.display = 'none';
+
+	console.log("Init game with", values);
+
+	//------------------------------------
+	var client = new MAngbandReactClient(
+		document.getElementById('screen'),
+		values
+	);
+	//------------------------------------
+	return false;
+})
+</script>
+
+</body>
+</html>
