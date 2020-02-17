@@ -231,7 +231,7 @@ const VISUAL_INFO_MISC = 5
 const VISUAL_INFO_PR   = 6
 
 
-class MAngband150ProtocolHandler extends MAngbandProtocolHandler {
+class MAngband153ProtocolHandler extends MAngbandProtocolHandler {
 
 	constructor(net, config, on_event) {
 		super(net, config, on_event);
@@ -1966,6 +1966,6 @@ class MAngStream {
 	}
 }
 
-register_protocol('mangband150', MAngband150ProtocolHandler);
+register_protocol('mangband153', MAngband153ProtocolHandler);
 
 })()/* End Fake Namespace */
