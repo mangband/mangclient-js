@@ -152,6 +152,31 @@ class MAngbandNetworkClient {
 	getCommands() { return this.protocol.getCommands(); }
 }
 
+class MetaMorph {
+	constructor(url) {
+		this.url = url;
+	}
+	update(cb) {
+		fetch(this.url)
+		.then(
+			function(response) {
+				if (response.status !== 200) {
+					console.log('Looks like there was a problem. Status Code: ' +
+						response.status);
+					return;
+				}
+				// Examine the text in the response
+				response.json().then(function(data) {
+					cb(data);
+				});
+			}
+		)
+		.catch(function(err) {
+			console.log('Fetch Error :-S', err);
+		});
+	}
+}
+
 class GameCommand {
 	constructor(config) {
 		this.key = config['key']
@@ -383,10 +408,10 @@ class MAngbandProtocolHandler {
 	cmd_drop_quiver(quiver_slot) { }
 	cmd_destroy_equip(equip_slot) { }
 	cmd_destroy_inven(inven_slot) { }
-	cmd_destroy_floor(floor_slot) {	}
-	cmd_useitem_equip(equip_slot) {	}
-	cmd_useitem_inven(inven_slot) {	}
-	cmd_useitem_floor(floor_slot) {	}
+	cmd_destroy_floor(floor_slot) { }
+	cmd_useitem_equip(equip_slot) { }
+	cmd_useitem_inven(inven_slot) { }
+	cmd_useitem_floor(floor_slot) { }
 }
 
 /* Some helper methods. */

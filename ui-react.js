@@ -118,3 +118,103 @@ class InventoryGrid extends React.Component {
 		}, children);
 	}
 }
+
+class MetaMenu {
+	constructor(root_node, config, on_event) {
+		if (!on_event) on_event = function() {};
+		let div = document.createElement('div');
+		root_node.appendChild(div);
+		this.root_node = root_node;
+		this.main_node = div;
+		this.on_event = on_event;
+		this.props = {'root': this};
+		this.eventHandlers = {};
+	}
+	pickServer(host, port, protocol) {
+		this.trigger('pick', {
+			"host": host,
+			"port": port,
+			"protocol": protocol,
+		});
+	}
+	on(evt, func) {
+		if (!this.eventHandlers[evt]) this.eventHandlers[evt] = [];
+		this.eventHandlers[evt].push(func);
+	}
+	off(evt) {
+		this.eventHandlers[evt] = [];
+	}
+	trigger(evt, e) {
+		if (e === undefined) e = { 'name': evt, 'info': {} };
+		//console.log("Event", evt, e);
+		if (!this.eventHandlers[evt]) return;
+		for (let k in this.eventHandlers[evt]) {
+			let callback = this.eventHandlers[evt][k];
+			callback(e);
+			if (e.stopped) {
+				break;
+			}
+		}
+		if (e.stopped) return;
+		this.on_event(e);
+	}
+
+	setProps(props) {
+		for (let k in props) {
+			this.props[k] = props[k];
+		}
+	}
+	render() {
+		ReactDOM.render(e(MetaList, this.props), this.main_node);
+	}
+}
+class MetaList extends React.Component {
+	render() {
+		const items_ = this.props.items || [];
+		let children = items_.map((item) =>
+			e(MetaEntry, {root: this.props.root, key: item.name+':'+item.port, ...item})
+		)
+		return e('table', {},
+			e('thead', {},
+				e('tr', {},
+					e('th', {}, ''),
+					e('th', {}, 'name'),
+					e('th', {}, 'variant'),
+					e('th', {}, 'version'),
+					e('th', {}, 'subvariant'),
+					e('th', {}, 'protocol'),
+					e('th', {}, 'ws addr'),
+					e('th', {}, 'ws port'),
+				),
+			),
+			e('tbody', {}, children),
+		);
+	}
+}
+class MetaEntry extends React.Component {
+	constructor(props) {
+		super(props);
+		bnd(this, 'onClick');
+	}
+	onClick() {
+		this.props.root.pickServer(
+			this.props.websocket_address,
+			this.props.websocket_port,
+			this.props.protocol,
+		);
+	}
+	render() {
+		const supported = window.mang_protocols[this.props.protocol];
+		console.log(this.props);
+		return e('tr', {onClick: this.onClick},
+			e('td', {}, this.props.flagship ? "★" : ""),
+			e('td', {}, this.props.name),
+			e('td', {}, this.props.variant),
+			e('td', {}, this.props.version),
+			e('td', {}, this.props.subvariant),
+			e('td', {className: supported ? "supported" : "not-supported"}, this.props.protocol),
+			e('td', {}, this.props.websocket_address),
+			e('td', {}, this.props.websocket_port),
+		);
+	}
+}

@@ -10,7 +10,7 @@
 <!-- Rest of the stuff. -->
 <script src="websock.js"></script>
 <script src="net-core.js"></script>
-<script src="net-mang150.js"></script>
+<script src="net-mang153.js"></script>
 <script src="net-pwma140.js"></script>
 <script src="net-tome472.js"></script>
 <script src="z-canvas.js"></script>
@@ -22,12 +22,46 @@
 <div id="screen" tabindex="1" style="background:blue;">
 </div>
 
+<div id="meta">
+<style>
+tr { cursor: pointer; }
+tr:hover {
+	background: #eee;
+}
+td.supported {
+}
+td.not-supported {
+	text-decoration: line-through;
+	color: #f00;
+}
+</style>
+</div>
+<script>
+var meta = new MetaMenu(document.getElementById('meta'))
+var morph = new MetaMorph("http://test.mangband.org:8008/servers");
+morph.update(function(data) {
+	for (let i in data) {
+		let e = data[i];
+		if (e.protocol == 'mangband152') e.protocol = 'mangband153';
+		if (e.protocol == 'tomenet473') e.protocol = 'tomenet472';
+		if (e.protocol == 'pwmangband140b0') e.protocol = 'pwmangband140';
+	}
+	meta.setProps({"items": data});
+	meta.render();
+});
+meta.on('pick', function(e) {
+	document.querySelector('#debug_constructor input[name="server"]').value = e.host;
+	document.querySelector('#debug_constructor input[name="port"]').value = e.port;
+	document.querySelector('#debug_constructor select[name="protocol"]').value = e.protocol;
+});
+</script>
+
 <!-- Some kind of a form to give some inputs. -->
 <form id="debug_constructor">
 	<p><span>server</span><input type="text" name="server" value="mangband.org" required/></p>
 	<p><span>port</span><input type="number" name="port" value="18380" required/></p>
 	<p><span>protocol</span><select name="protocol"></p>
-		<option>mangband150</option>
+		<option>mangband153</option>
 		<option>tomenet472</option>
 		<option>pwmangband140</option>
 	</select></p>
@@ -46,6 +80,8 @@ form.addEventListener('submit', function(e) {
 	values['server'] = 'ws://' + values['server'] + ':' + values['port'];
 
 	form.style.display = 'none';
+
+	document.getElementById('meta').style.display = 'none';
 
 	console.log("Init game with", values);
 
