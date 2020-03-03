@@ -51,7 +51,7 @@ see above for the link.
 PWMangband 1.4.0 (unreleased?), you can use one of
 the pre-written protocol handlers. If it's another
 game or version, you should write your own protocol
-handlers. See `net-core.js` and any of the existing
+handler. See `net-core.js` and any of the existing
 handlers for more info.
 6. To run the client, open 'react.html' in your browser.
 7. START HACKING.
@@ -69,7 +69,7 @@ of the websockify project.
 
 - modern event handling mechanism
 - unified abstractions over common packets
-- "protocol handlers" to cover different of severs/variants
+- "protocol handlers" to cover different servers/variants
 
 Related files: `net-*.js`
 
