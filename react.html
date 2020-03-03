@@ -44,7 +44,7 @@ morph.update(function(data) {
 		let e = data[i];
 		if (e.protocol == 'mangband152') e.protocol = 'mangband153';
 		if (e.protocol == 'tomenet473') e.protocol = 'tomenet472';
-		if (e.protocol == 'pwmangband140b0') e.protocol = 'pwmangband140';
+		if (e.protocol == 'pwmangband140b0') e.protocol = 'pwmangband140b0';
 	}
 	meta.setProps({"items": data});
 	meta.render();
@@ -63,7 +63,7 @@ meta.on('pick', function(e) {
 	<p><span>protocol</span><select name="protocol"></p>
 		<option>mangband153</option>
 		<option>tomenet472</option>
-		<option>pwmangband140</option>
+		<option>pwmangband140b0</option>
 	</select></p>
 	<p><span>login</span><input type="text" name="login" required/></p>
 	<p><span>password</span><input type="password" name="password" required/></p>

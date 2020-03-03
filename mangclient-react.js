@@ -21,7 +21,7 @@ class MAngbandReactClient {
 		let dungeon_offset_x = 13;
 		let dungeon_offset_y = 1;
 
-		if (config['protocol'] != 'mangband150') {
+		if (config['protocol'] != 'mangband153') {
 			dungeon_offset_x = 0;
 			dungeon_offset_y = 0;
 		}

@@ -47,7 +47,7 @@ to choose), and also can completely overtake the program's
 port (so there's ONLY a websocket interface), I'll leave
 that to you. I've tested it with a patched C version,
 see above for the link.
-5. If your game is MAngband 1.5.0, TomeNET 4.2.0 or
+5. If your game is MAngband 1.5.3, TomeNET >=4.7.2 or
 PWMangband 1.4.0 (unreleased?), you can use one of
 the pre-written protocol handlers. If it's another
 game or version, you should write your own protocol
@@ -71,7 +71,7 @@ of the websockify project.
 - unified abstractions over common packets
 - "protocol handlers" to cover different of severs/variants
 
-Related file: `net-*.js`
+Related files: `net-*.js`
 
 ### mangclient-react.js
 
@@ -80,4 +80,4 @@ React over client development. It shows the basics though,
 and will probably be used for consolidating protocol handlers
 some more.
 
-Related file: react.html, z-canvas.js, ui-react.js.
+Related files: react.html, z-canvas.js, ui-react.js.

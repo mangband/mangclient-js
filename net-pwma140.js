@@ -443,8 +443,7 @@ console.log(e.info.xtra.slot, e.info);
 		let that = this;
 		this.waitThen(this.mustReceiveInitialStatus, 10, function(reply) {
 			console.log("Initial info", reply);
-			this.finishHandShake();
-			this.trigger('client_setup', {'name':'client_setup'});
+			this.client_setup();
 		});
 		return;
 	}
@@ -499,6 +498,7 @@ console.log(e.info.xtra.slot, e.info);
 		this.keepalive_timer = setTimeout(this.run_keepalive_timer, 1000);
 	}
 	run_keepalive_timer() {
+		if (this.teardown) return;
 		this.send_keepalive();
 		this.keepalive_timer = setTimeout(this.run_keepalive_timer, 1000);
 	}
@@ -507,8 +507,8 @@ console.log(e.info.xtra.slot, e.info);
 	init_base_info() {
 		this.z_info = null;
 		this.TMD_MAX = 0;
-		this.settings = new Array(SETTING_MAX);
-		this.options = new Array(OPT_MAX);
+		this.settings = new Array(SETTING_MAX).fill(0);
+		this.options = new Array(OPT_MAX).fill(0);
 	}
 	init_data_sync() {
 	}
@@ -549,18 +549,25 @@ console.log(e.info.xtra.slot, e.info);
 	}
 
 	client_ready() {
+		if (this.sent_play == true) return;
 		this.gather_settings();
 		this.send_options(true);
+
 //		this.send_autoinscriptions();
 //		for (let i = 0; i < 5; i++) this.send_verify(i);
 //		this.send_features(0, 0);
 		this.setup_keepalive_timer();
+
+		//console.log("Now start play");
+		this.send_play(1);
+		this.sent_play = true;
 		this.trigger('client_ready', {'name': 'client_ready'});
 console.log("CLIENT IS READY");
 	}
 
 	client_setup() {
-		this.trigger('client_setup', {'name': 'client_setup'});
+		this.finishHandShake();
+		this.trigger('client_setup', {'name':'client_setup'});
 	}
 
 	enter(state) {
@@ -823,15 +830,12 @@ console.log("CLIENT IS READY");
 		if (info.char_state == 0) {
 			this.send_char_info();
 		}
-		if (this.sent_play) return;
+
 		this.client_ready();
-		//console.log("Now start play");
-		this.send_play(1);
-		this.sent_play = true;
 		return info;
 	}
 	recv_char_info() {
-		let info = this.read("%b%b%b", ['ridx','cidx', 'psex']);
+		let info = this.read("%b%b%b", ['ridx', 'cidx', 'psex']);
 		//console.log("Char info:",info);
 		return info;
 	}
@@ -1141,16 +1145,19 @@ console.log("CLIENT IS READY");
 			let format = formats[k];
 			let name = names[k];
 			let len = this.net.rQlen();
+			let signed_at_bit = 0;
 			if (format == 'c' || format == 'b') { /* Char, Byte */
 				if (len < 1) throw new NotEnoughBytes();
 				ret[name] = this.net.rQshift8();
+				if (format == 'c') signed_at_bit = 8;
 			} else if (format == 'hd' || format == 'hu') { /* 16-bit value */
 				if (len < 2) throw new NotEnoughBytes();
 				ret[name] = this.net.rQshift16();
-				if (ret[name] == 65535) ret[name] = -1;
+				if (format == 'hd') signed_at_bit = 16;
 			} else if (format == 'ld' || format == 'lu') { /* 32-bit value */
 				if (len < 4) throw new NotEnoughBytes();
 				ret[name] = this.net.rQshift32();
+				if (format == 'ld') signed_at_bit = 32;
 			} else if (format == 's' || format == 'S') { /* C String */
 				let i;
 				let done = false;
@@ -1169,6 +1176,13 @@ console.log("CLIENT IS READY");
 			} else {
 				throw new UndefinedQueueFormat(`Unknown format '%${format}' for '${name}'`);
 			}
+			if (signed_at_bit)
+			{
+				/* Unwrap two's complement */
+				let bits = (32 - signed_at_bit);
+				ret[name] = ret[name] << bits >> bits;
+			}
+
 		}
 		if (return_single_value) {
 			return ret['anyval'];
@@ -1186,6 +1200,8 @@ console.log("CLIENT IS READY");
 		for (let k in formats) {
 			let format = formats[k];
 			let value = args[k];
+			if (value === undefined) throw new Error("Can't write undefined value " + format)
+			if (typeof value === 'boolean') { value = value ? 1 : 0; }
 			if (format == 'c' || format == 'b') { /* Char, Byte */
 				this.send([value], flush);
 			} else if (format == 'hd' || format == 'hu') { /* 16-bit value */
@@ -1346,16 +1362,17 @@ console.log("CLIENT IS READY");
 		}
 	}
 	send_options(with_settings) {
-		this.write("%b%b", [PKT_OPTIONS, with_settings]);
+		this.write("%b%b", [PKT_OPTIONS, with_settings], false);
 		if (with_settings) {
 			for (let i = 0; i < SETTING_MAX; i++)
 			{
-				this.write("%hd", [this.settings[i]]);
+				this.write("%hd", [this.settings[i]], false);
 			}
 		}
 		for (let i = 0; i < OPT_MAX; i++) {
-			this.write("%c", [this.options[i]]);
+			this.write("%c", [this.options[i]], false);
 		}
+		this.flush();
 	}
 	send_autoinscriptions() {
 		this.write("%b", [PKT_AUTOINSCR]);
@@ -1630,6 +1647,6 @@ console.log("CLIENT IS READY");
 	}
 }
 
-register_protocol('pwmangband140', PWMAngband140ProtocolHandler);
+register_protocol('pwmangband140b0', PWMAngband140ProtocolHandler);
 
 })()/* End Fake Namespace */

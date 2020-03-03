@@ -705,6 +705,7 @@ class TomeNET472ProtocolHandler extends MAngbandProtocolHandler {
 		this.keepalive_timer = setTimeout(this.run_keepalive_timer, 2000);
 	}
 	run_keepalive_timer() {
+		if (this.teardown) return;
 		this.send_keepalive();
 		this.keepalive_timer = setTimeout(this.run_keepalive_timer, 2000);
 	}
@@ -1132,16 +1133,20 @@ class TomeNET472ProtocolHandler extends MAngbandProtocolHandler {
 			let format = formats[k];
 			let name = names[k];
 			let len = this.net.rQlen();
+			let signed_at_bit = 0;
 			if (format == 'c') { /* Char, Byte */
 				if (len < 1) throw new NotEnoughBytes();
 				ret[name] = this.net.rQshift8();
+				if (format == 'c') signed_at_bit = 8;
 			} else if (format == 'hd' || format == 'hu') { /* 16-bit value */
 				if (len < 2) throw new NotEnoughBytes();
 				ret[name] = this.net.rQshift16();
+				if (format == 'hd') signed_at_bit = 16;
 			} else if (format == 'd' || format == 'u'
 				|| format == 'ld' || format == 'lu') { /* 32-bit value */
 				if (len < 4) throw new NotEnoughBytes();
 				ret[name] = this.net.rQshift32();
+				if (format == 'ld' || format == 'd') signed_at_bit = 32;
 			} else if (format == 's' || format == 'S' || format == 'I') { /* C String */
 				let i;
 				let done = false;
@@ -1159,6 +1164,12 @@ class TomeNET472ProtocolHandler extends MAngbandProtocolHandler {
 				ret[name] = str;
 			} else {
 				throw new UndefinedQueueFormat(`Unknown format '%${format}' for '${name}'`);
+			}
+			if (signed_at_bit)
+			{
+				/* Unwrap two's complement */
+				let bits = (32 - signed_at_bit);
+				ret[name] = ret[name] << bits >> bits;
 			}
 		}
 		if (return_single_value) {

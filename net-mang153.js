@@ -714,6 +714,7 @@ class MAngband153ProtocolHandler extends MAngbandProtocolHandler {
 		this.recd_pings = 0;
 	}
 	run_keepalive_timer() {
+		if (this.teardown) return;
 		if (this.recd_pings == this.sent_pings)
 		{
 			this.send_keepalive(this.sent_pings++);
@@ -1363,17 +1364,20 @@ class MAngband153ProtocolHandler extends MAngbandProtocolHandler {
 			let format = formats[k];
 			let name = names[k];
 			let len = this.net.rQlen();
+			let signed_at_bit = 0;
 			if (format == 'c' || format == 'b') { /* Char, Byte */
 				if (len < 1) throw new NotEnoughBytes();
 				ret[name] = this.net.rQshift8();
+				if (format == 'c') signed_at_bit = 8;
 			} else if (format == 'ud' || format == 'd') { /* 16-bit value */
 				if (len < 2) throw NotEnoughBytes();
 				ret[name] = this.net.rQshift16();
+				if (format == 'd') signed_at_bit = 16;
 			} else if (format == 'ul' || format == 'l') { /* 32-bit value */
 				if (len < 4) throw new NotEnoughBytes();
 				ret[name] = this.net.rQshift32();
+				if (format == 'l') signed_at_bit = 32;
 			} else if (format == 's' || format == 'S') { /* C String */
-				let i;
 				let done = false;
 				let str = "";
 				for (let i = 0; i < len; i++) {
@@ -1389,6 +1393,12 @@ class MAngband153ProtocolHandler extends MAngbandProtocolHandler {
 				ret[name] = str;
 			} else {
 				throw new UndefinedQueueFormat(`Unknown format '%${format}' for '${name}'`);
+			}
+			if (signed_at_bit)
+			{
+				/* Unwrap two's complement */
+				let bits = (32 - signed_at_bit);
+				ret[name] = ret[name] << bits >> bits;
 			}
 		}
 		if (return_single_value) {
@@ -1433,7 +1443,6 @@ class MAngband153ProtocolHandler extends MAngbandProtocolHandler {
 
 	read_cave(rle, cols) {
 		let ret = new Array(cols).fill();
-		let i;
 		for (let i = 0; i < cols; i++) {
 			ret[i] = new Object({'a': 0, 'c': 0});
 		}
@@ -1556,8 +1565,7 @@ class MAngband153ProtocolHandler extends MAngbandProtocolHandler {
 		return len;
 	}
 	cv_decode_rle3(dst, src, len) {
-		let x;
-		for (x = 0; x < len; x++)
+		for (let x = 0; x < len; x++)
 		{
 			let i, n;
 			let a;

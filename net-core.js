@@ -88,6 +88,7 @@ class MAngbandNetworkClient {
 			let handler = this.protocol.packets[pkt];
 			if (!handler) {
 				Util.Error("UNDEFINED PACKET " + pkt + " (previous packet:" + this.last_pkt + ")");
+				this.protocol.close();
 				this.net.close();
 				return;
 			}
@@ -111,6 +112,7 @@ class MAngbandNetworkClient {
 				} else {
 					Util.Error("FATAL ERROR IN "+ handler.name + ": "+ e.message);
 					console.error(e);
+					this.protocol.close();
 					this.net.close();
 					return;
 				}
@@ -217,6 +219,11 @@ class MAngbandProtocolHandler {
 		/* 'config' - object. */
 		this.eventHandlers = {}
 		this.bypass = false;
+		/* mark teardown */
+		this.teardown = false;
+	}
+	close() {
+		this.teardown = true;
 	}
 	on(evt, callback) {
 		this.eventHandlers[evt] = callback;
@@ -432,4 +439,19 @@ function massivebind(o, attrs) {
 }
 if (!Date.now) {
     Date.now = function() { return new Date().getTime(); }
+}
+//https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/fill#Polyfill
+if (!Array.prototype.fill) {
+	Object.defineProperty(Array.prototype, 'fill', {
+		value: function(value) {
+			if (this == null) throw new TypeError('this is null or not defined');
+			var O = Object(this); var len = O.length >>> 0;
+			var start = arguments[1]; var relativeStart = start >> 0;
+			var k = relativeStart < 0 ? Math.max(len + relativeStart, 0) : Math.min(relativeStart, len);
+			var end = arguments[2]; var relativeEnd = end === undefined ? len : end >> 0;
+			var finalValue = relativeEnd < 0 ? Math.max(len + relativeEnd, 0) : Math.min(relativeEnd, len);
+			while (k < finalValue) { O[k] = value; k++; }
+			return O;
+		}
+	});
 }
