@@ -249,6 +249,7 @@ class TomeNET472ProtocolHandler extends MAngbandProtocolHandler {
 		massivebind(this, this.eventHandlers);
 
 		this.setup_blockread_timer();
+		this.blockread_timeout_multiplier = 3;
 
 		this.init_base_info();
 		/* Calling this manually */

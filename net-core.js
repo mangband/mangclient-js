@@ -221,6 +221,8 @@ class MAngbandProtocolHandler {
 		this.bypass = false;
 		/* mark teardown */
 		this.teardown = false;
+		/* other hacks */
+		this.blockread_timeout_multiplier = 1;
 	}
 	close() {
 		this.teardown = true;
@@ -257,7 +259,7 @@ class MAngbandProtocolHandler {
 		this.bypass = val;
 	}
 	waitThen(check_cb, timeout, success_cb) {
-		this.enable_blockread_timer(check_cb, timeout, success_cb);
+		this.enable_blockread_timer(check_cb, timeout * this.blockread_timeout_multiplier, success_cb);
 	}
 	setup_blockread_timer() {
 		this.waiting = false;
