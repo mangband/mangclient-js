@@ -421,7 +421,7 @@ console.log(e.info.xtra.slot, e.info);
 	}
 
 	setCredentials(login, password, realname, hostname) {
-		this.login = login;
+		this.login = capitalizeFirstLetter(login); /* Will get server error otherwise. */
 		this.password = password;
 		this.realname = realname || 'webclient';
 		this.hostname = hostname || window.location.origin;
