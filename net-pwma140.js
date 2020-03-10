@@ -452,8 +452,8 @@ console.log(e.info.xtra.slot, e.info);
 		let info = this.read("%c%hu%hu", ['status','num','max']);
 		const INIT_ERRORS = {
 			1: "Version is too old.",
-			2: "Invalid handshake.",
-			3: "Account error(?).",
+			2: "The server didn't like your nickname, realname or hostname.",
+			3: "The password you supplied for the account is incorrect.",
 			4: "Game is full.",
 			5: "Socket error!",
 			6: "Version is too new.",
