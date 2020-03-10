@@ -830,8 +830,9 @@ console.log("CLIENT IS READY");
 		if (info.char_state == 0) {
 			this.send_char_info();
 		}
-
-		this.client_ready();
+		if (info.char_state == 1) {
+			this.client_ready();
+		}
 		return info;
 	}
 	recv_char_info() {
@@ -1355,11 +1356,12 @@ console.log("CLIENT IS READY");
 		let ridx = 0;
 		let cidx = 0;
 		let psex = 1;
-		this.write("%b%b%b%b", [PKT_CHAR_INFO, ridx, cidx, psex]);
+		this.write("%b%b%b%b", [PKT_CHAR_INFO, ridx, cidx, psex], false);
 		for (let i = 0; i <= STAT_MAX; i++)
 		{
-			this.write("%hd", [0]);//[stat_roll[i]]);
+			this.write("%hd", [0], false);//[stat_roll[i]]);
 		}
+		this.flush();
 	}
 	send_options(with_settings) {
 		this.write("%b%b", [PKT_OPTIONS, with_settings], false);
