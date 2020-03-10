@@ -80,7 +80,7 @@ class UIWindow extends React.Component {
 			e(InventoryGrid, {group: 'floor', items: this.props.floor_items, root: this.props.root}),
 			e(InventoryGrid, {group: 'inven', items: this.props.inven_items, root: this.props.root}),
 			e(InventoryGrid, {
-				style: {cssText: 'position: absolute; left: 0; top: 0; margin-left: -200%; background: #000;'},
+				style: {cssText: 'position: absolute; left: 0; top: 0; margin-left: -200%; background: #000'},
 				group: 'store', items: this.props.store_items, root: this.props.root}),
 		)
 	}
