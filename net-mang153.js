@@ -1072,7 +1072,7 @@ class MAngband153ProtocolHandler extends MAngbandProtocolHandler {
 	}
 
 	recv_stream_info() {
-		let info = this.read("%c%c%c%c" + "%s%s" + "%ud%c%ud%c",
+		let info = this.read("%b%c%c%c" + "%s%s" + "%ud%c%ud%c",
 				[ 'pkt', 'addr', 'rle', 'flag',
 				  'mark', 'buf',
 				  'min_row', 'min_col', 'max_row', 'max_col' ]);
@@ -1093,7 +1093,7 @@ class MAngband153ProtocolHandler extends MAngbandProtocolHandler {
 
 	recv_indicator_info() {
 		let info = this.read(
-			"%c%c%c%c%d%d%ul%S%s", [
+			"%b%c%c%c%d%d%ul%S%s", [
 			'pkt', 'type', 'amnt', 'win', 'row', 'col', 'flag', 'buf', 'mark'
 		]);
 		let id = this.known_indicators;
