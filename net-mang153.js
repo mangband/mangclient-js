@@ -1013,6 +1013,8 @@ class MAngband153ProtocolHandler extends MAngbandProtocolHandler {
 			{
 				let name = this.read("%s");
 				let offset = this.read("%ul");
+				let xpos = this.read("%b");
+				let ypos = this.read("%b");
 				//console.log("INVEN", name, offset);
 			}
 		} else if (header['typ'] == STRUCT_INFO_OBJFLAGS) {
@@ -1236,25 +1238,31 @@ class MAngband153ProtocolHandler extends MAngbandProtocolHandler {
 	}
 
 	recv_equip() {
-		let info = this.read("%c%c%ud%c%b%s", 
+		let info = this.read("%c%c%ud%c%b%s",
 			['pos', 'attr', 'wgt', 'tval', 'flag', 'name']);
 		return info;
 	}
 
 	recv_inven() {
-		let info = this.read("%c%c%ud%d%c%b%b%s",
-			['pos', 'attr', 'wgt', 'amt', 'tval', 'flag', 'tester', 'name'])
+		let info = this.read("%c%c%c%c%ud%d%c%b%b%s%s",
+			['pos', 'a', 'c', 'attr', 'wgt', 'amt', 'tval', 'flag', 'tester', 'name', 'name_one'])
+		if (info.name_one.length == 0) info.name_one = name;
 		return info;
 	}
 
 	recv_floor() {
-		return this.read("%c%c%d%c%b%b%s",
-			['pos', 'attr', 'amt', 'tval', 'flag', 'tester', 'name'])
+		let info = this.read("%c%c%c%c" + "%d%c%b%b" + "%s%s",
+			['pos', 'a', 'c', 'attr',
+			'amt', 'tval', 'flag', 'tester',
+			'name', 'name_one'])
+		if (info.name_one.length == 0) info.name_one = name;
+		return info;
 	}
 
 	recv_store()
 	{
-		let info = this.read("%c%c%d%d%ul%s", ['pos', 'attr', 'wgt', 'num', 'price', 'name']);
+		let info = this.read("%c%c%c%c%d%d%ul%s",
+			['pos', 'a', 'c', 'attr', 'wgt', 'num', 'price', 'name']);
 
 		//store.stock[pos].sval = attr;
 		//store.stock[pos].weight = wgt;
